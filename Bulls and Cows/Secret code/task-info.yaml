@@ -1,0 +1,182 @@
+type: edu
+files:
+- name: src/bullscows/Main.java
+  visible: true
+  text: |-
+    package stage2.project;
+
+    import java.util.Scanner;
+
+    class Grade {
+        int bulls;
+        int cows;
+
+        Grade(int bulls, int cows) {
+            this.bulls = bulls;
+            this.cows = cows;
+        }
+    }
+
+    class Game {
+        String secret = "9305";
+
+        private static String getGuess() {
+            Scanner scanner = new Scanner(System.in);
+            return scanner.next();
+        }
+
+        Grade getGrade(String guess) {
+            int bulls = 0;
+            int cows = 0;
+
+            for (int i = 0; i < guess.length(); i++) {
+                if (guess.charAt(i) == this.secret.charAt(i)) {
+                    bulls += 1;
+                } else if (this.secret.indexOf(guess.charAt(i)) != -1) {
+                    cows += 1;
+                }
+            }
+
+            return new Grade(bulls, cows);
+        }
+
+        private void printGrade(Grade grade) {
+            String gradeString;
+
+            if (grade.bulls != 0 && grade.cows != 0) {
+                gradeString = String.format("%d bull(s) and %d cow(s)", grade.bulls, grade.cows);
+            } else if (grade.bulls != 0) {
+                gradeString = String.format("%d bull(s)", grade.bulls);
+            } else if (grade.cows != 0) {
+                gradeString = String.format("%d cow(s)", grade.cows);
+            } else {
+                gradeString = "None";
+            }
+
+            System.out.printf("Grade: %s. The secret code is %s.", gradeString, this.secret);
+            System.out.println();
+        }
+
+        void play() {
+            String guess = getGuess();
+            Grade grade = getGrade(guess);
+            printGrade(grade);
+        }
+    }
+
+    public class Main {
+        public static void main(String[] args) {
+            Game game = new Game();
+            game.play();
+        }
+    }
+  learner_created: false
+- name: test/BullsCowsTest.java
+  visible: false
+  text: |-
+    import bullscows.Main;
+    import org.hyperskill.hstest.dynamic.input.DynamicTestingMethod;
+    import org.hyperskill.hstest.stage.StageTest;
+    import org.hyperskill.hstest.testcase.CheckResult;
+    import org.hyperskill.hstest.testing.TestedProgram;
+
+    import java.util.ArrayList;
+    import java.util.Arrays;
+    import java.util.LinkedHashSet;
+    import java.util.List;
+    import java.util.stream.Collectors;
+
+    import static org.hyperskill.hstest.testing.expect.Expectation.expect;
+
+    public class BullsCowsTest extends StageTest<String> {
+
+        // basic test case
+        @DynamicTestingMethod
+        CheckResult test1() {
+            TestedProgram main = new TestedProgram();
+            main.start();
+            String output = main.execute("4").toLowerCase().trim();
+
+            return outputCheck(output, 4);
+        }
+
+        @DynamicTestingMethod
+        CheckResult test2() {
+            TestedProgram main = new TestedProgram();
+            main.start();
+            String output = main.execute("1").toLowerCase().trim();
+
+            return outputCheck(output, 1);
+        }
+
+        // test of incorrect input
+        @DynamicTestingMethod
+        CheckResult test4() {
+            TestedProgram main = new TestedProgram();
+            main.start();
+            String output = main.execute("11").toLowerCase().trim();
+
+            return outputCheck(output, 11);
+        }
+
+        @DynamicTestingMethod
+        CheckResult test5() {
+            TestedProgram main = new TestedProgram();
+            main.start();
+            String output = main.execute("6").toLowerCase().trim();
+
+            return outputCheck(output, 6);
+        }
+
+        @DynamicTestingMethod
+        CheckResult test6() {
+            TestedProgram main = new TestedProgram();
+            main.start();
+            String output = main.execute("3").toLowerCase().trim();
+
+            return outputCheck(output, 3);
+        }
+
+
+        CheckResult outputCheck(String source, int length) {
+
+            if (length > 10) {
+                if (source.toLowerCase().contains("error")) {
+                    return CheckResult.correct();
+                } else {
+                    return CheckResult.wrong("An error message expected with input " +
+                            "\"" + length + "\"");
+                }
+            }
+
+            List<Integer> integers = expect(source).toContain(1).integers();
+            source = "" + integers.get(0);
+
+            if (source.length() != length) {
+                return CheckResult.wrong("The output number of your program has " +
+                        "an incorrect length (found " + source.length() + ")");
+            }
+
+            List<Integer> temp = stringToArrayOfNumbers(source);
+            temp = new ArrayList<>(new LinkedHashSet<>(temp));
+
+            if (temp.toArray().length != source.length()) {
+                return CheckResult.wrong("Digits in the generated number are not unique.");
+            }
+
+            return CheckResult.correct();
+        }
+
+        private static List<Integer> stringToArrayOfNumbers(String array) {
+            return Arrays.stream(array.split(""))
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList());
+        }
+    }
+  learner_created: false
+feedback_link: https://hyperskill.org/projects/53/stages/289/implement#comment
+status: Solved
+feedback:
+  message: Congratulations!
+  time: "Tue, 29 Aug 2023 15:26:40 UTC"
+record: 3
